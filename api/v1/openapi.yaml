@@ -1,0 +1,220 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: DraftProjectService API
+    description: Сервис для работы с MyItem
+    version: ${API_VERSION}
+paths:
+    /api/v1/my-items:
+        get:
+            tags:
+                - DraftProjectService
+            description: Получение списка элементов
+            operationId: DraftProjectService_ListMyItems
+            parameters:
+                - name: pageSize
+                  in: query
+                  description: размер страницы
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageNumber
+                  in: query
+                  description: номер страницы
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListMyItemsResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        post:
+            tags:
+                - DraftProjectService
+            description: Создание нового элемента
+            operationId: DraftProjectService_CreateMyItem
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateMyItemRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/MyItem'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/v1/my-items/{id}:
+        get:
+            tags:
+                - DraftProjectService
+            description: Получение существующего элемента
+            operationId: DraftProjectService_GetMyItem
+            parameters:
+                - name: id
+                  in: path
+                  description: уникальный идентификатор в формате UUID
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/MyItem'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        delete:
+            tags:
+                - DraftProjectService
+            description: Удаление существующего элемента
+            operationId: DraftProjectService_DeleteMyItem
+            parameters:
+                - name: id
+                  in: path
+                  description: уникальный идентификатор в формате UUID
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+        patch:
+            tags:
+                - DraftProjectService
+            description: Обновление существующего элемента
+            operationId: DraftProjectService_UpdateMyItem
+            parameters:
+                - name: id
+                  in: path
+                  description: уникальный идентификатор в формате UUID
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateMyItemRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/MyItem'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+components:
+    schemas:
+        CreateMyItemRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: имя элемента
+            description: Запрос на создание элемента
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        ListMyItemsResponse:
+            type: object
+            properties:
+                myItems:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/MyItem'
+                    description: список элементов на странице
+                nextPageNumber:
+                    type: integer
+                    description: номер следующей страницы
+                    format: int32
+            description: Список элементов
+        MyItem:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: уникальный идентификатор в формате UUID
+                name:
+                    type: string
+                    description: имя элемента
+                createdAt:
+                    type: string
+                    description: время создания элемента
+                    format: date-time
+                updatedAt:
+                    type: string
+                    description: время последнего изменения элемента
+                    format: date-time
+            description: Описание элемента
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+        UpdateMyItemRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: уникальный идентификатор в формате UUID
+                name:
+                    type: string
+                    description: имя элемента
+            description: Запрос на обновление элемента
+tags:
+    - name: DraftProjectService
