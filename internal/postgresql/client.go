@@ -3,66 +3,52 @@ package postgresql
 import (
 	"context"
 	"database/sql"
-	"log"
+	"time"
 
 	"github.com/georgysavva/scany/v2/dbscan"
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/tracelog"
 )
 
-func NewConnect(
-	ctx context.Context,
-	cfg Config,
-	logger *log.Logger,
-	col metrics.MetricIface,
-) (*Connect, error) {
+type Connect struct {
+	Pgx            *pgxpool.Pool
+	ScanAPI        *pgxscan.API
+	RequestTimeout time.Duration
+}
+
+func NewRepository(ctx context.Context, cfg Config) (*Connect, error) {
 	c, err := pgxpool.ParseConfig(cfg.DSN)
 	if err != nil {
 		return nil, err
 	}
 
-	c.ConnConfig.Tracer = &combinedTracer{
-		logger:        logger,
-		level:         cfg.LogLevel,
-		col:           col,
-		otel:          otelpgx.NewTracer(),
-		enableLogging: cfg.EnableLogging,
-		dbName:        c.ConnConfig.Database,
+	c.ConnConfig.Tracer = &tracelog.TraceLog{
+		Logger:   &CustomTracer{},
+		LogLevel: tracelog.LogLevelDebug,
 	}
 
 	c.MaxConnIdleTime = cfg.MaxConnIdleTime
+	c.HealthCheckPeriod = cfg.HealthCheckPeriod
 
 	conn, err := pgxpool.NewWithConfig(ctx, c)
 	if err != nil {
 		return nil, err
 	}
 
-	err = conn.Ping(ctx)
+	if err = conn.Ping(ctx); err != nil {
+		return nil, err
+	}
+
+	scanner, err := pgxscan.NewDBScanAPI(dbscan.WithScannableTypes((*sql.Scanner)(nil)))
 	if err != nil {
 		return nil, err
 	}
 
-	col.StartPoolStatsMonitoring(ctx, conn, cfg.MetricsUpdateInterval, c.ConnConfig.Database)
-
-	scanAPI, err := newScanApi()
+	scanAPI, err := pgxscan.NewAPI(scanner)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Connect{
-		Pgx:            pgxConn,
-		ScanAPI:        scanAPI,
-		RequestTimeout: cfg.RequestTimeout,
-	}, nil
-}
-
-func newScanApi() (*pgxscan.API, error) {
-	scanner, err := pgxscan.NewDBScanAPI(
-		dbscan.WithScannableTypes((*sql.Scanner)(nil)),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return pgxscan.NewAPI(scanner)
+	return &Connect{Pgx: conn, ScanAPI: scanAPI, RequestTimeout: cfg.RequestTimeout}, nil
 }

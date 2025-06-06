@@ -1,29 +1,40 @@
 package main
 
-// func parseConfig() (config.Params, error) {
-// 	cfg := config.Params{}
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
 
-// 	if err := env.Parse(cfg); err != nil {
-// 		return config.Params{}, fmt.Errorf(
-// 			"failed to parse config for environment variables: %w", err,
-// 		)
-// 	}
+	"github.com/LittleLe6owski/link-shortener/internal/config"
+	"github.com/LittleLe6owski/link-shortener/internal/instance"
+	"github.com/caarlos0/env/v6"
+)
 
-// 	return cfg, nil
-// }
+func parseConfig() (config.Config, error) {
+	cfg := config.Config{}
 
-// func main() {
-// 	cfg, err := parseConfig()
-// 	if err != nil {
-// 		log.Default().Fatal(err)
-// 	}
+	if err := env.Parse(cfg); err != nil {
+		return config.Config{}, fmt.Errorf(
+			"failed to parse config for environment variables: %w", err,
+		)
+	}
 
-// 	linkShortener, err := instance.New(cfg)
-// 	if err != nil {
-// 		log.Default().Fatal(err)
-// 	}
+	return cfg, nil
+}
 
-// 	if err := linkShortener.Run(context.Background()); err != nil {
-// 		os.Exit(1)
-// 	}
-// }
+func main() {
+	cfg, err := parseConfig()
+	if err != nil {
+		log.Default().Fatal(err)
+	}
+
+	linkShortener, err := instance.New(cfg)
+	if err != nil {
+		log.Default().Fatal(err)
+	}
+
+	if err := linkShortener.Run(context.Background()); err != nil {
+		os.Exit(1)
+	}
+}
