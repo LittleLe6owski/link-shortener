@@ -1,0 +1,302 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "api/v1/link.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "LinkShortenerService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/link": {
+      "post": {
+        "operationId": "LinkShortenerService_CreateLink",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Link"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateLinkRequest"
+            }
+          }
+        ],
+        "tags": [
+          "LinkShortenerService"
+        ]
+      }
+    },
+    "/api/v1/link/{id}": {
+      "get": {
+        "operationId": "LinkShortenerService_GetLink",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Link"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "уникальный идентификатор в формате UUID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "LinkShortenerService"
+        ]
+      },
+      "delete": {
+        "operationId": "LinkShortenerService_DeleteMyItem",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "уникальный идентификатор в формате UUID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "LinkShortenerService"
+        ]
+      },
+      "put": {
+        "operationId": "LinkShortenerService_UpdateLink",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1PutLinkResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "ид ссылки",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LinkShortenerServiceUpdateLinkBody"
+            }
+          }
+        ],
+        "tags": [
+          "LinkShortenerService"
+        ]
+      },
+      "patch": {
+        "operationId": "LinkShortenerService_ExtendLifeTime",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1PatchLinkResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "ид ссылки",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LinkShortenerServiceExtendLifeTimeBody"
+            }
+          }
+        ],
+        "tags": [
+          "LinkShortenerService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "LinkShortenerServiceExtendLifeTimeBody": {
+      "type": "object",
+      "properties": {
+        "newExpiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "title": "новое время жизни в днях"
+        }
+      }
+    },
+    "LinkShortenerServiceUpdateLinkBody": {
+      "type": "object",
+      "properties": {
+        "fullUri": {
+          "type": "string",
+          "title": "новый полный uri"
+        },
+        "newExpiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "title": "новое время жизни в днях"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1CreateLinkRequest": {
+      "type": "object",
+      "properties": {
+        "fullUri": {
+          "type": "string",
+          "title": "имя элемента"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "title": "кол-во дней, после которого ссылка будет удалена"
+        }
+      },
+      "title": "Запрос на создание элемента"
+    },
+    "v1Link": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "уникальный идентификатор в формате UUID"
+        },
+        "fullUri": {
+          "type": "string",
+          "title": "полный uri"
+        },
+        "shortUri": {
+          "type": "string",
+          "title": "укороченный uri"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "title": "время создания элемента"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "title": "время последнего изменения элемента"
+        }
+      },
+      "title": "Описание элемента"
+    },
+    "v1PatchLinkResponse": {
+      "type": "object",
+      "properties": {
+        "isSuccessfully": {
+          "type": "boolean",
+          "title": "успешно ли обновили новое время жизни"
+        }
+      }
+    },
+    "v1PutLinkResponse": {
+      "type": "object",
+      "properties": {
+        "isSuccessfully": {
+          "type": "boolean",
+          "title": "успешно ли обновили"
+        }
+      }
+    }
+  }
+}

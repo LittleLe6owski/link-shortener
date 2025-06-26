@@ -1,0 +1,70 @@
+version: "3"
+
+dotenv: ["config/.env", ".env"]
+
+vars:
+  DSN: postgres://{{.POSTGRES_HOST|default "localhost"}}:{{.POSTGRES_PORT|default "5432"}}/{{.POSTGRES_DBNAME|default "db"}}?sslmode={{.POSTGRES_SSLMODE|default "disable"}}&user={{.POSTGRES_USER|default "user"}}&password={{.POSTGRES_PASSWORD|default "postgres"}}
+
+tasks:
+  install:
+    cmds:
+      - go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.5
+      - go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.19.1
+      - go install github.com/yoheimuta/protolint/cmd/protolint@v0.50.5
+      - go install -v github.com/n-r-w/protodep@v1.0.0
+      - go install github.com/vektra/mockery/v2@v2.45.0
+      - go install github.com/xo/xo@v1.0.2
+      - go install go.uber.org/mock/mockgen@v0.4.0
+      - go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
+      - go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.24.0
+      - go install github.com/envoyproxy/protoc-gen-validate@v1.1.0
+      - go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1
+      - go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.18.2
+  run:
+    desc: "Запуск сервиса"
+    cmds:
+      - go run ./cmd/ {{.CLI_ARGS}}
+
+  test-run:
+    summary: |
+      Запуск тестов.
+
+      По умолчанию тестируется весь код. Если необходимо протестировать определённый пакет, то необходимо задать 
+      значение для переменной PACKAGE при запуске команды.
+    vars:
+      PACKAGE: '{{.PACKAGE|default "./..."}}'
+      EXCLUDE_PATTERNS: gen/|mock/|mocks/|\.pb\.go|\.gw\.go|\.validate\.go|\.xo\.go|testutils/
+    cmds:
+      - echo 'Excluding patterns {{.EXCLUDE_PATTERNS}}'
+      - echo 'Running tests for {{.PACKAGE}}'
+      - |
+        GOFLAGS=-tags=integration,unit go test -timeout 1200s -coverpkg=./... -coverprofile=coverage.out -v {{.PACKAGE}} ; 
+        grep -v -E '{{.EXCLUDE_PATTERNS}}' coverage.out > filtered_coverage.out
+      - go tool cover -func=filtered_coverage.out
+      - go tool cover -html=filtered_coverage.out -o ./testlogs/lastcoverage.html
+      - rm coverage.out > /dev/null 2>&1
+      - rm filtered_coverage.out > /dev/null 2>&1
+
+  test:
+    desc: "Запуск test-run с сохранением логов в файл"
+    cmds:
+      - mkdir -p testlogs
+      - task test-run | tee ./testlogs/testlog_$(date '+%Y_%m_%d_%m_%X')_$(git branch --show-current | sed 's|/|-|g').txt
+
+  dotenv:
+    desc: "Сгенерировать пример .env конфига"
+    cmds:
+      - go run ./cmd/dotenv/main.go
+
+  generate-pb:
+    desc: "Генерация go-кода и сваггер-спецификации из proto"
+    cmds:
+      - |
+        protoc -I vendor.proto --proto_path=. \
+        --go_out . --go_opt paths=source_relative \
+        --go-grpc_out . --go-grpc_opt paths=source_relative \
+        --grpc-gateway_out . \
+        --grpc-gateway_opt paths=source_relative \
+        --validate_out=paths=source_relative,lang=go:./ \
+        --openapiv2_out=omit_enum_default_value=true,output_format=json,allow_merge=true,merge_file_name=link-shortener:api \
+        api/v1/*.proto

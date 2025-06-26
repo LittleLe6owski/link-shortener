@@ -1,0 +1,126 @@
+syntax = "proto3";
+package template.api.v1;
+
+import "google/api/annotations.proto";
+import "validate/validate.proto";
+
+option go_package = "gitlab.bronevik.space/bronevik/service/cfs/print-form-generator/api/v1";
+
+// TemplateService сервис по работе с шаблонами
+service TemplateService {
+    // CreateTemplate создание шаблона
+    rpc CreateTemplate(CreateTemplateRequest) returns (CreateTemplateResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/templates"
+            body: "*"
+        };
+    };
+
+    // UpdateTemplate обновление шаблона
+    rpc UpdateTemplate(UpdateTemplateRequest) returns (UpdateTemplateResponse) {
+        option (google.api.http) = {
+            put: "/api/v1/templates"
+            body: "*"
+        };
+    };
+
+    // GetTemplates получение шаблонов
+    rpc GetTemplates(GetTemplatesRequest) returns (GetTemplatesResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/templates"
+        };
+    };
+}
+
+// TemplateFormat форматы шаблонов
+enum TemplateFormat {
+    TEMPLATE_UNSPECIFIED = 0;  // не определено
+    TEMPLATE_PDF         = 1;  // pdf
+    TEMPLATE_XLS         = 2;  // excel
+    TEMPLATE_ODT         = 3;  // odt
+    TEMPLATE_CSV         = 4;  // csv
+}
+
+// CreateTemplateRequest payload запроса для CreateTemplate
+message CreateTemplateRequest {
+    string key              = 1 [(validate.rules).string.min_len = 1];  // ключ шаблона
+    string template_content = 2 [(validate.rules).string.min_len = 1];  // содержание шаблона
+
+    // формат шаблона
+    TemplateFormat format = 3 [(validate.rules).enum = {
+        defined_only: true,
+        not_in: [ 0 ]
+    }];
+
+    bool   active = 4;                                        // активность шаблона
+    string token  = 5 [(validate.rules).string.min_len = 1];  // jwt токен
+}
+
+// CreateTemplateResponse payload ответа для CreateTemplate
+message CreateTemplateResponse {
+    // Идентификатор шаблона.
+    int64 id = 1;
+}
+
+// UpdateTemplateRequest payload запроса для UpdateTemplate
+message UpdateTemplateRequest {
+    int64  id               = 1 [(validate.rules).int64.gt = 0];        // идентификатор шаблона
+    string key              = 2 [(validate.rules).string.min_len = 1];  // ключ шаблона
+    string template_content = 3 [(validate.rules).string.min_len = 1];  // содержание шаблона
+
+    // формат шаблона
+    TemplateFormat format = 4 [(validate.rules).enum = {
+        defined_only: true,
+        not_in: [ 0 ]
+    }];
+
+    bool   active = 5;                                        // активность шаблона
+    string token  = 6 [(validate.rules).string.min_len = 1];  // jwt токен
+}
+
+// UpdateTemplateResponse payload ответа для UpdateTemplate
+message UpdateTemplateResponse {}
+
+// GetTemplatesRequest payload запроса для GetTemplates
+message GetTemplatesRequest {
+    // id шаблонов. Не может быть указан вместе с полем key
+    repeated int64 template_ids = 1 [(validate.rules).repeated = {
+        items: { int64: { gt: 0 } },
+    }];
+
+    // ключ шаблона. Не может быть указан вместе с полем template_ids
+    optional string key = 2 [(validate.rules).string.min_len = 1];
+
+    // формат шаблона
+    TemplateFormat format = 3 [(validate.rules).enum = {
+        defined_only: true,
+    }];
+
+    optional bool         active       = 4;  // активность шаблона
+    optional DateInterval created_date = 5;  // дата создания шаблона
+    optional DateInterval update_date  = 6;  // дата обновления шаблона
+
+    // DateInterval интервал дат
+    message DateInterval {
+        int64 date_start = 1;  // дата начала периода
+        int64 date_end   = 2;  // дата окончания периода
+    }
+
+    string token = 7 [(validate.rules).string.min_len = 1];  // jwt токен
+}
+
+// GetTemplatesResponse payload запроса для GetTemplates
+message GetTemplatesResponse {
+    repeated Template templates = 1;  // список шаблонов.
+
+    // Template данные по шаблону
+    message Template {
+        int64          id               = 1;  // идентификатор шаблона
+        string         key              = 2;  // ключ шаблона
+        string         template_content = 3;  // содержание шаблона
+        TemplateFormat format           = 4;  // формат
+        bool           active           = 5;  // активность шаблона
+        int64          created_at       = 6;  // дата создания шаблона
+        int64          updated_at       = 7;  // дата обновления шаблона
+    }
+}

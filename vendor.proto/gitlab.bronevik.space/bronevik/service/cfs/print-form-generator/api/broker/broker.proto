@@ -1,0 +1,29 @@
+syntax = "proto3";
+package generation.api.v1;
+
+import "google/protobuf/struct.proto";
+import "validate/validate.proto";
+
+option go_package = "gitlab.bronevik.space/bronevik/service/cfs/print-form-generator/api/broker";
+
+// GenerateDocumentRequest payload запроса на генерацию документа.
+message GenerateDocumentRequest {
+    // идентификатор задания на генерацию документа в виде uuid
+    string job_id = 1 [(validate.rules).string.uuid = true, json_name = "jobId"];
+
+    // флаг отвечающий за то, должен ли удалиться файл после того, как из хранилища его скачает
+    // пользователь
+    bool must_delete_after_read = 2 [json_name = "mustDeleteAfterRead"];
+    int64 ttl = 3 [json_name = "ttl"];  // время жизни объекта, если TTL равен 0, то время жизни бесконечно
+    string jwt_token = 4
+        [(validate.rules).string.min_len = 1, json_name = "jwtToken"];  // токен технической учетной записи
+
+    // идентификатор шаблона из БД принтформ, который должен заполниться данными из поля template_data_chunks
+    int64 template_id = 5 [(validate.rules).int64 = { gt: 0 }, json_name = "templateId"];
+
+    // Информация для заполнения шаблона.
+    // Для pdf-шаблона можно передать несколько элементов в массиве, которые будут объединены в один документ
+    // в том порядке, в котором были переданы.
+    repeated google.protobuf.Struct template_data_chunks = 6
+        [(validate.rules).repeated .min_items = 1, json_name = "templateDataChunks"];
+}

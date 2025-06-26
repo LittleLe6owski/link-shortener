@@ -1,0 +1,41 @@
+syntax = "proto3";
+package generation.api.v1;
+
+import "google/api/annotations.proto";
+import "validate/validate.proto";
+
+option go_package = "gitlab.bronevik.space/bronevik/service/cfs/print-form-generator/api/v1";
+
+// GenerationService сервис работы с генерацией документов
+service GenerationService {
+    // GetGeneration получение генерации по ее job_id в базе данных. Job_id является идентификатором, который
+    // генерируется в монолите и получается сервисом через сообщение кафки.
+    rpc GetGeneration(GetGenerationRequest) returns (GetGenerationResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/generation/{job_id}"
+        };
+    };
+}
+
+// GetGenerationRequest payload запроса для GetGeneration
+message GetGenerationRequest {
+    string job_id = 1 [(validate.rules).string.uuid = true];  // uuid задачи
+    string token  = 2 [(validate.rules).string.min_len = 1];  // jwt токен
+}
+
+// GetGenerationResponse payload ответа для GetGeneration
+message GetGenerationResponse {
+    Generation generation = 1;  // данные по генерации
+}
+
+// Generation сущность генерации, которая передается при запросе на получение генерации.
+message Generation {
+    int64  id          = 1;                                        // id генерации
+    string created_at  = 2;                                        // дата создания
+    string updated_at  = 3;                                        // дата обновления
+    string job_id      = 4 [(validate.rules).string.uuid = true];  // uuid задачи
+    int64  template_id = 5;                                        // id шаблона
+    bool must_delete_after_read = 6;  // должен ли быть удалена генерация после чтения
+    int64 ttl  = 7;                   // время жизни генерации
+    bool  done = 8;                   // ...
+}

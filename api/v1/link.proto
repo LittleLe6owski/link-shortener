@@ -1,104 +1,105 @@
-// +template and .WithEntity .WithGRPC
 syntax = "proto3";
-package draftproject.api.v1;
+package linkshortener.api.v1;
 
-option go_package = "gitlab.bronevik.space/bronevik/backend/draft-project/pkg/api/v1";
+option go_package = "github.com/LittleLe6owski/link-shortener/pkg/api/v1";
 
-import "google/api/annotations.proto";
-import "google/api/field_behavior.proto";
 import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/descriptor.proto";
+import "validate/validate.proto";
 
-// Сервис для работы с MyItem
-service DraftProjectService {
-    // Создание нового элемента
-    rpc CreateMyItem(CreateMyItemRequest) returns (MyItem) {
-        option (google.api.http) = {// +template .WithHTTP
-            post: "/api/v1/my-items"    // +template .WithHTTP
-            body: "*"   // +template .WithHTTP
-        };  // +template .WithHTTP
+service LinkShortenerService {
+    rpc CreateLink(CreateLinkRequest) returns (Link) {
+        option (google.api.http) = {
+            post: "/api/v1/link"   
+            body: "*"   
+        };  
     };
 
-    // Получение существующего элемента
-    rpc GetMyItem(GetMyItemRequest) returns (MyItem) {
-        option (google.api.http) = {// +template .WithHTTP
-            get: "/api/v1/my-items/{id}"    // +template .WithHTTP
-        };  // +template .WithHTTP
+    rpc GetLink(GetLinkRequest) returns (Link) {
+        option (google.api.http) = {
+            get: "/api/v1/link/{id}"    
+        }; 
     };
 
-    // Обновление существующего элемента
-    rpc UpdateMyItem(UpdateMyItemRequest) returns (MyItem) {
-        option (google.api.http) = {// +template .WithHTTP
-            patch: "/api/v1/my-items/{id}"  // +template .WithHTTP
-            body: "*"   // +template .WithHTTP
-        };  // +template .WithHTTP
+    rpc UpdateLink(PutLinkRequest) returns (PutLinkResponse) {
+        option (google.api.http) = {
+            put: "/api/v1/link/{id}"  
+            body: "*"  
+        }; 
     };
 
-    // Удаление существующего элемента
-    rpc DeleteMyItem(DeleteMyItemRequest) returns (google.protobuf.Empty) {
-        option (google.api.http) = {// +template .WithHTTP
-            delete: "/api/v1/my-items/{id}"    // +template .WithHTTP
-        };  // +template .WithHTTP
+    rpc ExtendLifeTime(PatchLinkRequest) returns (PatchLinkResponse) {
+        option (google.api.http) = {
+            patch: "/api/v1/link/{id}"  
+            body: "*"  
+        }; 
     };
 
-    // Получение списка элементов
-    rpc ListMyItems(ListMyItemsRequest) returns (ListMyItemsResponse) {
-        option (google.api.http) = {// +template .WithHTTP
-            get: "/api/v1/my-items" // +template .WithHTTP
-        };  // +template .WithHTTP
+    rpc DeleteMyItem(DeleteLinkRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/api/v1/link/{id}"    
+        }; 
     };
 }
 
 // Описание элемента
-message MyItem {
+message Link {
     // уникальный идентификатор в формате UUID
     string id = 1;
-    // имя элемента
-    string name = 2;
+    // полный uri
+    string full_uri = 2;
+    // укороченный uri
+    string short_uri = 3;
     // время создания элемента
-    google.protobuf.Timestamp created_at = 3;
+    google.protobuf.Timestamp created_at = 4;
     // время последнего изменения элемента
-    google.protobuf.Timestamp updated_at = 4;
+    google.protobuf.Timestamp updated_at = 5;
 }
 
 // Запрос на создание элемента
-message CreateMyItemRequest {
+message CreateLinkRequest {
     // имя элемента
-    string name = 1;
+    string full_uri = 1 [(validate.rules).string.uri = true];
+    // кол-во дней, после которого ссылка будет удалена
+    optional google.protobuf.Timestamp expires_at = 2 [(validate.rules).timestamp.required = true];
 }
 
 // Запрос на получение элемента
-message GetMyItemRequest {
+message GetLinkRequest {
     // уникальный идентификатор в формате UUID
-    string id = 1;
-}
-
-// Запрос на обновление элемента
-message UpdateMyItemRequest {
-    // уникальный идентификатор в формате UUID
-    string id = 1;
-    // имя элемента
-    string name = 2;
+    string id = 1 [(validate.rules).string.uuid = true];
 }
 
 // Запрос на удаление элемента
-message DeleteMyItemRequest {
+message DeleteLinkRequest {
     // уникальный идентификатор в формате UUID
-    string id = 1;
+    string id = 1 [(validate.rules).string.uuid = true];
 }
 
-// Запрос на получение списка элементов
-message ListMyItemsRequest {
-    // размер страницы
-    int32 page_size = 1;
-    // номер страницы
-    int32 page_number = 2;
+message PatchLinkRequest {
+    // ид ссылки
+    string id = 1 [(validate.rules).string.uuid = true];
+    // новое время жизни в днях
+    google.protobuf.Timestamp new_expires_at = 2 [(validate.rules).timestamp.required = true];
 }
 
-// Список элементов
-message ListMyItemsResponse {
-    // список элементов на странице
-    repeated MyItem my_items = 1;
-    // номер следующей страницы
-    int32 next_page_number = 2;
+message PatchLinkResponse {
+    // успешно ли обновили новое время жизни
+    bool is_successfully = 1;
+}
+
+message PutLinkRequest {
+    // ид ссылки
+    string id = 1 [(validate.rules).string.uuid = true];
+    // новый полный uri
+    string full_uri = 2 [(validate.rules).string.uri = true];
+    // новое время жизни в днях
+    google.protobuf.Timestamp new_expires_at = 3 [(validate.rules).timestamp.required = true];
+}
+
+message PutLinkResponse {
+    // успешно ли обновили
+    bool is_successfully = 1;
 }
