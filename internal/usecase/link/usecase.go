@@ -53,7 +53,7 @@ func (s *LinkManager) CreateLink(
 	createLink := domain.Link{
 		ID:        uuid.New(),
 		FullURI:   request.FullURI,
-		ShortURI:  node.Generate().String(),
+		ShortURI:  node.Generate().Int64(),
 		CreatedAt: tn,
 		UpdatedAt: tn,
 		ExpiresAt: expAt,
@@ -118,7 +118,7 @@ func (s *LinkManager) UpdateLink(ctx context.Context, request domain.PutLinkRequ
 	newLink := domain.Link{
 		ID:        request.ID,
 		FullURI:   request.FullURI,
-		ShortURI:  node.Generate().String(),
+		ShortURI:  node.Generate().Int64(),
 		UpdatedAt: time.Now().UTC(),
 		ExpiresAt: expAt,
 	} //exhaustruct:enforce
@@ -150,4 +150,26 @@ func (s *LinkManager) DeleteLink(ctx context.Context, request domain.DeleteLinkR
 	}
 
 	return true, nil
+}
+
+func (s *LinkManager) GetByRedirect(ctx context.Context, short_uri int64) (string, error) {
+	link, err := s.linkCache.GetByShortURI(ctx, short_uri)
+	if err != nil {
+		return "", fmt.Errorf("failed to get link in cache: %w", err)
+	}
+
+	if !link.IsEmpty() {
+		return link.FullURI, nil
+	}
+
+	link, err = s.linkRepoPG.GetByShortURI(ctx, short_uri)
+	if err != nil {
+		return "", fmt.Errorf("failed to get link in storage: %w", err)
+	}
+
+	if err = s.linkCache.Set(ctx, link); err != nil {
+		return "", fmt.Errorf("failed to set link in cache: %w", err)
+	}
+
+	return link.FullURI, nil
 }

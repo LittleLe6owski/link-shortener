@@ -84,8 +84,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "type": "object",
-              "properties": {}
+              "$ref": "#/definitions/v1DeleteLinkResponse"
             }
           },
           "default": {
@@ -182,6 +181,37 @@
           "LinkShortenerService"
         ]
       }
+    },
+    "/api/v1/r/{shortLink}": {
+      "get": {
+        "operationId": "LinkShortenerService_Redirect",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1RedirectResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "shortLink",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "LinkShortenerService"
+        ]
+      }
     }
   },
   "definitions": {
@@ -252,6 +282,15 @@
       },
       "title": "Запрос на создание элемента"
     },
+    "v1DeleteLinkResponse": {
+      "type": "object",
+      "properties": {
+        "isSuccessfully": {
+          "type": "boolean",
+          "title": "успешно ли обновили"
+        }
+      }
+    },
     "v1Link": {
       "type": "object",
       "properties": {
@@ -265,6 +304,7 @@
         },
         "shortUri": {
           "type": "string",
+          "format": "int64",
           "title": "укороченный uri"
         },
         "createdAt": {
@@ -295,6 +335,14 @@
         "isSuccessfully": {
           "type": "boolean",
           "title": "успешно ли обновили"
+        }
+      }
+    },
+    "v1RedirectResponse": {
+      "type": "object",
+      "properties": {
+        "fullUri": {
+          "type": "string"
         }
       }
     }

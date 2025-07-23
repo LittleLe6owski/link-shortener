@@ -2,9 +2,6 @@ version: "3"
 
 dotenv: ["config/.env", ".env"]
 
-vars:
-  DSN: postgres://{{.POSTGRES_HOST|default "localhost"}}:{{.POSTGRES_PORT|default "5432"}}/{{.POSTGRES_DBNAME|default "db"}}?sslmode={{.POSTGRES_SSLMODE|default "disable"}}&user={{.POSTGRES_USER|default "user"}}&password={{.POSTGRES_PASSWORD|default "postgres"}}
-
 tasks:
   install:
     cmds:
@@ -12,8 +9,6 @@ tasks:
       - go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.19.1
       - go install github.com/yoheimuta/protolint/cmd/protolint@v0.50.5
       - go install -v github.com/n-r-w/protodep@v1.0.0
-      - go install github.com/vektra/mockery/v2@v2.45.0
-      - go install github.com/xo/xo@v1.0.2
       - go install go.uber.org/mock/mockgen@v0.4.0
       - go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
       - go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.24.0
@@ -51,10 +46,25 @@ tasks:
       - mkdir -p testlogs
       - task test-run | tee ./testlogs/testlog_$(date '+%Y_%m_%d_%m_%X')_$(git branch --show-current | sed 's|/|-|g').txt
 
-  dotenv:
-    desc: "Сгенерировать пример .env конфига"
+  migrate-up:
+    desc: "Запуск миграции файлов"
+    env:
+      GOOSE_DRIVER: postgres 
+      GOOSE_TABLE: public.goose_migrations
+      GOOSE_MIGRATION_DIR: migrations/postgres/
+      GOOSE_DBSTRING: postgres://localhost:5432/test?sslmode=disable&user=user&password=postgres
     cmds:
-      - go run ./cmd/dotenv/main.go
+      - goose up
+
+  migrate-down:
+    desc: "Запуск миграции файлов"
+    env:
+      GOOSE_DRIVER: postgres 
+      GOOSE_TABLE: public.goose_migrations
+      GOOSE_MIGRATION_DIR: migrations/postgres/
+      GOOSE_DBSTRING: postgres://localhost:5432/test?sslmode=disable&user=user&password=postgres
+    cmds:
+      - goose down
 
   generate-pb:
     desc: "Генерация go-кода и сваггер-спецификации из proto"

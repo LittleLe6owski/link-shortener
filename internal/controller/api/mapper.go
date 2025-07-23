@@ -10,34 +10,54 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func fromProtoCreateLinkRequest(req *apiv1.CreateLinkRequest) domain.CreateLinkRequest {
+func fromProtoCreateLinkRequest(req *apiv1.CreateLinkRequest) (domain.CreateLinkRequest, error) {
+	if err := req.ValidateAll(); err != nil {
+		return domain.CreateLinkRequest{}, err
+	}
+
 	expAt := mo.None[time.Time]()
 	if expAtOrNil := req.GetExpiresAt(); expAtOrNil != nil {
 		expAt = mo.Some(expAtOrNil.AsTime())
 	}
 
-	return domain.CreateLinkRequest{FullURI: req.FullUri, ExpiresAt: expAt}
+	return domain.CreateLinkRequest{FullURI: req.FullUri, ExpiresAt: expAt}, nil
 }
 
 func fromProtoGetLinkRequest(req *apiv1.GetLinkRequest) (domain.GetLinkRequest, error) {
+	if err := req.ValidateAll(); err != nil {
+		return domain.GetLinkRequest{}, err
+	}
+
 	id, err := uuid.Parse(req.GetId())
 
 	return domain.GetLinkRequest{ID: id}, err
 }
 
 func fromProtoDeleteLinkRequest(req *apiv1.DeleteLinkRequest) (domain.DeleteLinkRequest, error) {
+	if err := req.ValidateAll(); err != nil {
+		return domain.DeleteLinkRequest{}, err
+	}
+
 	id, err := uuid.Parse(req.GetId())
 
 	return domain.DeleteLinkRequest{ID: id}, err
 }
 
 func fromProtoPatchLinkRequest(req *apiv1.PatchLinkRequest) (domain.PatchLinkRequest, error) {
+	if err := req.ValidateAll(); err != nil {
+		return domain.PatchLinkRequest{}, err
+	}
+
 	id, err := uuid.Parse(req.GetId())
 
 	return domain.PatchLinkRequest{ID: id, ExpiresAt: req.GetNewExpiresAt().AsTime()}, err
 }
 
 func fromProtoPutLinkRequest(req *apiv1.PutLinkRequest) (domain.PutLinkRequest, error) {
+	if err := req.ValidateAll(); err != nil {
+		return domain.PutLinkRequest{}, err
+	}
+
 	id, err := uuid.Parse(req.GetId())
 
 	return domain.PutLinkRequest{

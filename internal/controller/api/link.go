@@ -9,7 +9,12 @@ import (
 func (s *LinkShortenerService) CreateLink(
 	ctx context.Context, request *apiv1.CreateLinkRequest,
 ) (*apiv1.Link, error) {
-	m, err := s.LinkShortenerService.CreateLink(ctx, fromProtoCreateLinkRequest(request))
+	entity, err := fromProtoCreateLinkRequest(request)
+	if err != nil {
+		return nil, toGRPCErr(err)
+	}
+
+	m, err := s.LinkShortenerService.CreateLink(ctx, entity)
 	if err != nil {
 		return nil, toGRPCErr(err)
 	}
@@ -25,12 +30,12 @@ func (s *LinkShortenerService) GetLink(
 		return nil, toGRPCErr(err)
 	}
 
-	m, err := s.LinkShortenerService.GetLink(ctx, entity)
+	link, err := s.LinkShortenerService.GetLink(ctx, entity)
 	if err != nil {
 		return nil, toGRPCErr(err)
 	}
 
-	return toProtoCreateLinkResponse(m)
+	return toProtoCreateLinkResponse(link)
 }
 
 func (s *LinkShortenerService) PatchLink(
@@ -41,12 +46,12 @@ func (s *LinkShortenerService) PatchLink(
 		return nil, toGRPCErr(err)
 	}
 
-	m, err := s.LinkShortenerService.UpdateExpiresAt(ctx, domain)
+	isUpdated, err := s.LinkShortenerService.UpdateExpiresAt(ctx, domain)
 	if err != nil {
 		return nil, toGRPCErr(err)
 	}
 
-	return &apiv1.PatchLinkResponse{IsSuccessfully: m}, nil
+	return &apiv1.PatchLinkResponse{IsSuccessfully: isUpdated}, nil
 }
 
 func (s *LinkShortenerService) PutLink(
@@ -57,21 +62,37 @@ func (s *LinkShortenerService) PutLink(
 		return nil, toGRPCErr(err)
 	}
 
-	m, err := s.LinkShortenerService.UpdateLink(ctx, domain)
+	isUpdated, err := s.LinkShortenerService.UpdateLink(ctx, domain)
 	if err != nil {
 		return nil, toGRPCErr(err)
 	}
 
-	return &apiv1.PutLinkResponse{IsSuccessfully: m}, nil
+	return &apiv1.PutLinkResponse{IsSuccessfully: isUpdated}, nil
 }
 
 func (s *LinkShortenerService) DeleteLink(
-	ctx context.Context, request *apiv1.CreateLinkRequest,
-) (*apiv1.Link, error) {
-	m, err := s.LinkShortenerService.CreateLink(ctx, fromProtoCreateLinkRequest(request))
+	ctx context.Context, request *apiv1.DeleteLinkRequest,
+) (*apiv1.DeleteLinkResponse, error) {
+	deleteReq, err := fromProtoDeleteLinkRequest(request)
 	if err != nil {
 		return nil, toGRPCErr(err)
 	}
 
-	return toProtoCreateLinkResponse(m)
+	isDeleted, err := s.LinkShortenerService.DeleteLink(ctx, deleteReq)
+	if err != nil {
+		return nil, toGRPCErr(err)
+	}
+
+	return &apiv1.DeleteLinkResponse{IsSuccessfully: isDeleted}, nil
+}
+
+func (s *LinkShortenerService) Redirect(
+	ctx context.Context, request *apiv1.RedirectRequest,
+) (*apiv1.RedirectResponse, error) {
+	fullURI, err := s.LinkShortenerService.GetByRedirect(ctx, request.ShortLink)
+	if err != nil {
+		return nil, toGRPCErr(err)
+	}
+
+	return &apiv1.RedirectResponse{FullUri: fullURI}, nil
 }

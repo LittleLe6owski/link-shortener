@@ -14,12 +14,12 @@ const (
 )
 
 type Link struct {
-	ID          uuid.UUID
-	FullURI     string
-	ShortURI    string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	ExpiresAt   time.Time
+	ID        uuid.UUID
+	FullURI   string
+	ShortURI  int64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	ExpiresAt time.Time
 }
 
 func (l Link) IsEmpty() bool {

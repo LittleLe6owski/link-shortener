@@ -26,12 +26,12 @@ func (l LinkRepository) Create(ctx context.Context, link domain.Link) (domain.Li
 	var result Link
 
 	insertQu := `INSERT INTO link_shortener.links(
-		id, full_uri, short_uri, created_at, updated_at, expires_at) VALUES  ($1, $2, $3, $4, $5)
-			RETURNING id, full_uri, short_uri, expires_at, created_at, updated_at`
+		id, full_uri, short_uri, created_at, updated_at, expires_at) VALUES  ($1, $2, $3, $4, $5, $6)
+			RETURNING id, full_uri, short_uri, created_at, updated_at, expires_at`
 
-	err := l.connector.ScanAPI.Select(ctx, l.connector.Pgx, result, insertQu,
-		link.ID, link.FullURI, link.ShortURI, link.CreatedAt, link.UpdatedAt, link.ExpiresAt,
-	)
+	err := l.connector.Pgx.QueryRow(
+		ctx, insertQu, link.ID, link.FullURI, link.ShortURI, link.CreatedAt, link.UpdatedAt, link.ExpiresAt,
+	).Scan(&result.ID, &result.FullURI, &result.ShortURI, &result.CreatedAt, &result.UpdatedAt, &result.ExpiresAt)
 	if err != nil {
 		return domain.Link{}, ToEntityError(err)
 	}
@@ -49,6 +49,22 @@ func (l LinkRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.Link,
 							id = $1 AND is_deleted = false`
 
 	if err := l.connector.ScanAPI.Get(ctx, l.connector.Pgx, &result, selectQuery, id); err != nil {
+		return domain.Link{}, ToEntityError(err)
+	}
+
+	return toDomainMyItem(result), nil
+}
+
+func (l LinkRepository) GetByShortURI(ctx context.Context, shortURI int64) (domain.Link, error) {
+	var result Link
+
+	selectQuery := `SELECT id, full_uri, short_uri, expires_at, created_at, updated_at
+						FROM
+						    link_shortener.links
+						WHERE
+							short_uri = $1 AND is_deleted = false`
+
+	if err := l.connector.ScanAPI.Get(ctx, l.connector.Pgx, &result, selectQuery, shortURI); err != nil {
 		return domain.Link{}, ToEntityError(err)
 	}
 

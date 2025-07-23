@@ -3,7 +3,6 @@ package linkshortener.api.v1;
 
 option go_package = "github.com/LittleLe6owski/link-shortener/pkg/api/v1";
 
-import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/descriptor.proto";
@@ -37,10 +36,16 @@ service LinkShortenerService {
         }; 
     };
 
-    rpc DeleteMyItem(DeleteLinkRequest) returns (google.protobuf.Empty) {
+    rpc DeleteMyItem(DeleteLinkRequest) returns (DeleteLinkResponse) {
         option (google.api.http) = {
             delete: "/api/v1/link/{id}"    
         }; 
+    };
+
+    rpc Redirect(RedirectRequest) returns (RedirectResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/r/{short_link}"
+        };
     };
 }
 
@@ -51,7 +56,7 @@ message Link {
     // полный uri
     string full_uri = 2;
     // укороченный uri
-    string short_uri = 3;
+    int64 short_uri = 3;
     // время создания элемента
     google.protobuf.Timestamp created_at = 4;
     // время последнего изменения элемента
@@ -72,10 +77,18 @@ message GetLinkRequest {
     string id = 1 [(validate.rules).string.uuid = true];
 }
 
-// Запрос на удаление элемента
-message DeleteLinkRequest {
-    // уникальный идентификатор в формате UUID
+message PutLinkRequest {
+    // ид ссылки
     string id = 1 [(validate.rules).string.uuid = true];
+    // новый полный uri
+    string full_uri = 2 [(validate.rules).string.uri = true];
+    // новое время жизни в днях
+    google.protobuf.Timestamp new_expires_at = 3 [(validate.rules).timestamp.required = true];
+}
+
+message PutLinkResponse {
+    // успешно ли обновили
+    bool is_successfully = 1;
 }
 
 message PatchLinkRequest {
@@ -90,16 +103,21 @@ message PatchLinkResponse {
     bool is_successfully = 1;
 }
 
-message PutLinkRequest {
-    // ид ссылки
+// Запрос на удаление элемента
+message DeleteLinkRequest {
+    // уникальный идентификатор в формате UUID
     string id = 1 [(validate.rules).string.uuid = true];
-    // новый полный uri
-    string full_uri = 2 [(validate.rules).string.uri = true];
-    // новое время жизни в днях
-    google.protobuf.Timestamp new_expires_at = 3 [(validate.rules).timestamp.required = true];
 }
 
-message PutLinkResponse {
+message DeleteLinkResponse {
     // успешно ли обновили
     bool is_successfully = 1;
+}
+
+message RedirectRequest {
+    int64 short_link = 1;
+}
+
+message RedirectResponse {
+    string full_uri = 1;
 }

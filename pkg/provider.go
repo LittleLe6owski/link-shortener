@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/pprof"
 	"net/textproto"
@@ -9,12 +10,16 @@ import (
 	"sync/atomic"
 
 	"github.com/LittleLe6owski/link-shortener/api"
+	apiv1 "github.com/LittleLe6owski/link-shortener/api/v1"
 	"github.com/LittleLe6owski/link-shortener/pkg/server"
 	"github.com/go-openapi/runtime/middleware"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 )
 
@@ -34,25 +39,30 @@ func GrpcProvider(app *server.App) *server.GRPCServer {
 }
 
 func GRPCGatewayHandlerProvider(app *server.App) *runtime.ServeMux {
-	return runtime.NewServeMux(runtime.WithIncomingHeaderMatcher(headerMatcher))
+	return runtime.NewServeMux(
+		runtime.WithIncomingHeaderMatcher(headerMatcher),
+		runtime.WithForwardResponseOption(
+			func(ctx context.Context, w http.ResponseWriter, m proto.Message) error {
+				if redirectResp, ok := m.(*apiv1.RedirectResponse); ok {
+					w.Header().Set("Location", redirectResp.FullUri)
+					w.WriteHeader(http.StatusFound)
+					return nil
+				}
+
+				return nil
+			},
+		),
+	)
 }
 
-const (
-	requestTagHeader = "X-Request-Tag"
-)
-
 func headerMatcher(key string) (string, bool) {
-	key = textproto.CanonicalMIMEHeaderKey(key)
-	switch key {
-	case requestTagHeader:
-		return key, true
-	default:
-		return runtime.DefaultHeaderMatcher(key)
-	}
+	return runtime.DefaultHeaderMatcher(textproto.CanonicalMIMEHeaderKey(key))
 }
 
 func unaryServerInterceptor(logger zerolog.Logger) grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
+	return func(
+		ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
+	) (resp any, err error) {
 		defer func() {
 			if r := recover(); r != nil {
 				logger.With().Fields([]any{string(debug.Stack())}).Err(err)
@@ -106,5 +116,18 @@ func ReadinessHandler(state *atomic.Bool) func(http.ResponseWriter, *http.Reques
 		}
 
 		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func RegisterGatewayHook(app *server.App, gatewayHandler *runtime.ServeMux) server.Hook {
+	return func(ctx context.Context, app *server.App) error {
+		opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+
+		return apiv1.RegisterLinkShortenerServiceHandlerFromEndpoint(
+			ctx,
+			gatewayHandler,
+			fmt.Sprintf("%s:%s", app.Config().Service.GRPC.Host, app.Config().Service.GRPC.Port),
+			opts,
+		)
 	}
 }

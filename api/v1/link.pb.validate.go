@@ -458,363 +458,6 @@ var _ interface {
 	ErrorName() string
 } = GetLinkRequestValidationError{}
 
-// Validate checks the field values on DeleteLinkRequest with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *DeleteLinkRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on DeleteLinkRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// DeleteLinkRequestMultiError, or nil if none found.
-func (m *DeleteLinkRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *DeleteLinkRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if err := m._validateUuid(m.GetId()); err != nil {
-		err = DeleteLinkRequestValidationError{
-			field:  "Id",
-			reason: "value must be a valid UUID",
-			cause:  err,
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if len(errors) > 0 {
-		return DeleteLinkRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-func (m *DeleteLinkRequest) _validateUuid(uuid string) error {
-	if matched := _link_uuidPattern.MatchString(uuid); !matched {
-		return errors.New("invalid uuid format")
-	}
-
-	return nil
-}
-
-// DeleteLinkRequestMultiError is an error wrapping multiple validation errors
-// returned by DeleteLinkRequest.ValidateAll() if the designated constraints
-// aren't met.
-type DeleteLinkRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m DeleteLinkRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m DeleteLinkRequestMultiError) AllErrors() []error { return m }
-
-// DeleteLinkRequestValidationError is the validation error returned by
-// DeleteLinkRequest.Validate if the designated constraints aren't met.
-type DeleteLinkRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e DeleteLinkRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e DeleteLinkRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e DeleteLinkRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e DeleteLinkRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e DeleteLinkRequestValidationError) ErrorName() string {
-	return "DeleteLinkRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e DeleteLinkRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sDeleteLinkRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = DeleteLinkRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = DeleteLinkRequestValidationError{}
-
-// Validate checks the field values on PatchLinkRequest with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *PatchLinkRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on PatchLinkRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// PatchLinkRequestMultiError, or nil if none found.
-func (m *PatchLinkRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *PatchLinkRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if err := m._validateUuid(m.GetId()); err != nil {
-		err = PatchLinkRequestValidationError{
-			field:  "Id",
-			reason: "value must be a valid UUID",
-			cause:  err,
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if m.GetNewExpiresAt() == nil {
-		err := PatchLinkRequestValidationError{
-			field:  "NewExpiresAt",
-			reason: "value is required",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if len(errors) > 0 {
-		return PatchLinkRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-func (m *PatchLinkRequest) _validateUuid(uuid string) error {
-	if matched := _link_uuidPattern.MatchString(uuid); !matched {
-		return errors.New("invalid uuid format")
-	}
-
-	return nil
-}
-
-// PatchLinkRequestMultiError is an error wrapping multiple validation errors
-// returned by PatchLinkRequest.ValidateAll() if the designated constraints
-// aren't met.
-type PatchLinkRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m PatchLinkRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m PatchLinkRequestMultiError) AllErrors() []error { return m }
-
-// PatchLinkRequestValidationError is the validation error returned by
-// PatchLinkRequest.Validate if the designated constraints aren't met.
-type PatchLinkRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e PatchLinkRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e PatchLinkRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e PatchLinkRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e PatchLinkRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e PatchLinkRequestValidationError) ErrorName() string { return "PatchLinkRequestValidationError" }
-
-// Error satisfies the builtin error interface
-func (e PatchLinkRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sPatchLinkRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = PatchLinkRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = PatchLinkRequestValidationError{}
-
-// Validate checks the field values on PatchLinkResponse with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *PatchLinkResponse) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on PatchLinkResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// PatchLinkResponseMultiError, or nil if none found.
-func (m *PatchLinkResponse) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *PatchLinkResponse) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for IsSuccessfully
-
-	if len(errors) > 0 {
-		return PatchLinkResponseMultiError(errors)
-	}
-
-	return nil
-}
-
-// PatchLinkResponseMultiError is an error wrapping multiple validation errors
-// returned by PatchLinkResponse.ValidateAll() if the designated constraints
-// aren't met.
-type PatchLinkResponseMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m PatchLinkResponseMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m PatchLinkResponseMultiError) AllErrors() []error { return m }
-
-// PatchLinkResponseValidationError is the validation error returned by
-// PatchLinkResponse.Validate if the designated constraints aren't met.
-type PatchLinkResponseValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e PatchLinkResponseValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e PatchLinkResponseValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e PatchLinkResponseValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e PatchLinkResponseValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e PatchLinkResponseValidationError) ErrorName() string {
-	return "PatchLinkResponseValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e PatchLinkResponseValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sPatchLinkResponse.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = PatchLinkResponseValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = PatchLinkResponseValidationError{}
-
 // Validate checks the field values on PutLinkRequest with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
@@ -1068,3 +711,668 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = PutLinkResponseValidationError{}
+
+// Validate checks the field values on PatchLinkRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *PatchLinkRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on PatchLinkRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// PatchLinkRequestMultiError, or nil if none found.
+func (m *PatchLinkRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *PatchLinkRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if err := m._validateUuid(m.GetId()); err != nil {
+		err = PatchLinkRequestValidationError{
+			field:  "Id",
+			reason: "value must be a valid UUID",
+			cause:  err,
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetNewExpiresAt() == nil {
+		err := PatchLinkRequestValidationError{
+			field:  "NewExpiresAt",
+			reason: "value is required",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return PatchLinkRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+func (m *PatchLinkRequest) _validateUuid(uuid string) error {
+	if matched := _link_uuidPattern.MatchString(uuid); !matched {
+		return errors.New("invalid uuid format")
+	}
+
+	return nil
+}
+
+// PatchLinkRequestMultiError is an error wrapping multiple validation errors
+// returned by PatchLinkRequest.ValidateAll() if the designated constraints
+// aren't met.
+type PatchLinkRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PatchLinkRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PatchLinkRequestMultiError) AllErrors() []error { return m }
+
+// PatchLinkRequestValidationError is the validation error returned by
+// PatchLinkRequest.Validate if the designated constraints aren't met.
+type PatchLinkRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PatchLinkRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PatchLinkRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PatchLinkRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PatchLinkRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PatchLinkRequestValidationError) ErrorName() string { return "PatchLinkRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e PatchLinkRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPatchLinkRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PatchLinkRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PatchLinkRequestValidationError{}
+
+// Validate checks the field values on PatchLinkResponse with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *PatchLinkResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on PatchLinkResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// PatchLinkResponseMultiError, or nil if none found.
+func (m *PatchLinkResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *PatchLinkResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for IsSuccessfully
+
+	if len(errors) > 0 {
+		return PatchLinkResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// PatchLinkResponseMultiError is an error wrapping multiple validation errors
+// returned by PatchLinkResponse.ValidateAll() if the designated constraints
+// aren't met.
+type PatchLinkResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PatchLinkResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PatchLinkResponseMultiError) AllErrors() []error { return m }
+
+// PatchLinkResponseValidationError is the validation error returned by
+// PatchLinkResponse.Validate if the designated constraints aren't met.
+type PatchLinkResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PatchLinkResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PatchLinkResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PatchLinkResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PatchLinkResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PatchLinkResponseValidationError) ErrorName() string {
+	return "PatchLinkResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e PatchLinkResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPatchLinkResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PatchLinkResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PatchLinkResponseValidationError{}
+
+// Validate checks the field values on DeleteLinkRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *DeleteLinkRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DeleteLinkRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DeleteLinkRequestMultiError, or nil if none found.
+func (m *DeleteLinkRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DeleteLinkRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if err := m._validateUuid(m.GetId()); err != nil {
+		err = DeleteLinkRequestValidationError{
+			field:  "Id",
+			reason: "value must be a valid UUID",
+			cause:  err,
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return DeleteLinkRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+func (m *DeleteLinkRequest) _validateUuid(uuid string) error {
+	if matched := _link_uuidPattern.MatchString(uuid); !matched {
+		return errors.New("invalid uuid format")
+	}
+
+	return nil
+}
+
+// DeleteLinkRequestMultiError is an error wrapping multiple validation errors
+// returned by DeleteLinkRequest.ValidateAll() if the designated constraints
+// aren't met.
+type DeleteLinkRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DeleteLinkRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DeleteLinkRequestMultiError) AllErrors() []error { return m }
+
+// DeleteLinkRequestValidationError is the validation error returned by
+// DeleteLinkRequest.Validate if the designated constraints aren't met.
+type DeleteLinkRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DeleteLinkRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DeleteLinkRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DeleteLinkRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DeleteLinkRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DeleteLinkRequestValidationError) ErrorName() string {
+	return "DeleteLinkRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DeleteLinkRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDeleteLinkRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DeleteLinkRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DeleteLinkRequestValidationError{}
+
+// Validate checks the field values on DeleteLinkResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *DeleteLinkResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DeleteLinkResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DeleteLinkResponseMultiError, or nil if none found.
+func (m *DeleteLinkResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DeleteLinkResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for IsSuccessfully
+
+	if len(errors) > 0 {
+		return DeleteLinkResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// DeleteLinkResponseMultiError is an error wrapping multiple validation errors
+// returned by DeleteLinkResponse.ValidateAll() if the designated constraints
+// aren't met.
+type DeleteLinkResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DeleteLinkResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DeleteLinkResponseMultiError) AllErrors() []error { return m }
+
+// DeleteLinkResponseValidationError is the validation error returned by
+// DeleteLinkResponse.Validate if the designated constraints aren't met.
+type DeleteLinkResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DeleteLinkResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DeleteLinkResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DeleteLinkResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DeleteLinkResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DeleteLinkResponseValidationError) ErrorName() string {
+	return "DeleteLinkResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DeleteLinkResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDeleteLinkResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DeleteLinkResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DeleteLinkResponseValidationError{}
+
+// Validate checks the field values on RedirectRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *RedirectRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on RedirectRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// RedirectRequestMultiError, or nil if none found.
+func (m *RedirectRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *RedirectRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for ShortLink
+
+	if len(errors) > 0 {
+		return RedirectRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// RedirectRequestMultiError is an error wrapping multiple validation errors
+// returned by RedirectRequest.ValidateAll() if the designated constraints
+// aren't met.
+type RedirectRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m RedirectRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m RedirectRequestMultiError) AllErrors() []error { return m }
+
+// RedirectRequestValidationError is the validation error returned by
+// RedirectRequest.Validate if the designated constraints aren't met.
+type RedirectRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e RedirectRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e RedirectRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e RedirectRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e RedirectRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e RedirectRequestValidationError) ErrorName() string { return "RedirectRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e RedirectRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sRedirectRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = RedirectRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = RedirectRequestValidationError{}
+
+// Validate checks the field values on RedirectResponse with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *RedirectResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on RedirectResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// RedirectResponseMultiError, or nil if none found.
+func (m *RedirectResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *RedirectResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for FullUri
+
+	if len(errors) > 0 {
+		return RedirectResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// RedirectResponseMultiError is an error wrapping multiple validation errors
+// returned by RedirectResponse.ValidateAll() if the designated constraints
+// aren't met.
+type RedirectResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m RedirectResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m RedirectResponseMultiError) AllErrors() []error { return m }
+
+// RedirectResponseValidationError is the validation error returned by
+// RedirectResponse.Validate if the designated constraints aren't met.
+type RedirectResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e RedirectResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e RedirectResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e RedirectResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e RedirectResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e RedirectResponseValidationError) ErrorName() string { return "RedirectResponseValidationError" }
+
+// Error satisfies the builtin error interface
+func (e RedirectResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sRedirectResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = RedirectResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = RedirectResponseValidationError{}

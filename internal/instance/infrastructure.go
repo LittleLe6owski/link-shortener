@@ -62,7 +62,7 @@ func WithPostgres(ctx context.Context, cfg config.Config, log zerolog.Logger, i 
 
 func WithRedis(ctx context.Context, cfg config.Config, log zerolog.Logger, i *infrastructure) error {
 	redisConfig := redis.Config{
-		Hosts:        cfg.Redis.Host,
+		Hosts:        cfg.Redis.Hosts,
 		Password:     cfg.Redis.Password,
 		Database:     cfg.Redis.Database,
 		ReadTimeout:  cfg.Redis.ReadTimeout,

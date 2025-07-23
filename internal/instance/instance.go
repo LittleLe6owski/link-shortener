@@ -28,8 +28,8 @@ func New(cfg config.Config) (*server.App, error) {
 	}
 
 	pgLinkRepo := pglink.NewRepository(infra.PGConnect)
-	redisLinkStorage := redislink.NewRepository(infra.RedisClient, cfg.Redis.DefaultTTL, cfg.Redis.Prefix)
-	SnowflakeManager := redissnowflake.NewRepository(infra.RedisClient, cfg.Redis.Prefix)
+	redisLinkStorage := redislink.NewRepository(infra.RedisClient, cfg.Redis.DefaultTTL, cfg.Redis.PrefixKey)
+	SnowflakeManager := redissnowflake.NewRepository(infra.RedisClient, cfg.Redis.PrefixKey)
 
 	linkManager := link.NewLinkManger(
 		pgLinkRepo,
@@ -51,6 +51,8 @@ func New(cfg config.Config) (*server.App, error) {
 
 	httpServer.Router().Handle("/api/", gatewayHandler)
 	pkg.AddSwagger(httpServer.Router())
+
+	linkShortener.AddPostHook(pkg.RegisterGatewayHook(linkShortener, gatewayHandler))
 
 	linkShortener.AddServer(httpServer)
 

@@ -16,7 +16,7 @@ type Link struct {
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 	ExpiresAt pgtype.Timestamptz `db:"expires_at"`
 	FullURI   string             `db:"full_uri"`
-	ShortURI  string             `db:"short_uri"`
+	ShortURI  int64              `db:"short_uri"`
 }
 
 func fromDomainMyItem(in domain.Link) (Link, error) {

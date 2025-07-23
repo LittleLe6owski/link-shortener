@@ -1,0 +1,52 @@
+
+services:
+  db:
+    image: postgres:15-alpine  
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: user
+      POSTGRES_DB: db
+    restart: unless-stopped  
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  
+    healthcheck:  
+      test: ["CMD-SHELL", "pg_isready -U user -d db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis-server:
+    image: redis:7-alpine 
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass 123 --bind 0.0.0.0
+    volumes:
+      - redis_data:/data  
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redisinsight:
+    image: redislabs/redisinsight:1.11.0
+    container_name: redisinsight
+    environment:
+    - REDISINSIGHT_HOST=0.0.0.0
+    - REDISINSIGHT_PORT=8001
+    ports:
+      - "8001:8001"
+    volumes:
+      - redisinsight_data:/db
+    restart: unless-stopped
+    depends_on:
+      redis-server:
+        condition: service_healthy  
+
+volumes:
+  postgres_data:  
+  redis_data:
+  redisinsight_data:

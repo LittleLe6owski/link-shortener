@@ -11,7 +11,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -25,6 +24,7 @@ const (
 	LinkShortenerService_UpdateLink_FullMethodName     = "/linkshortener.api.v1.LinkShortenerService/UpdateLink"
 	LinkShortenerService_ExtendLifeTime_FullMethodName = "/linkshortener.api.v1.LinkShortenerService/ExtendLifeTime"
 	LinkShortenerService_DeleteMyItem_FullMethodName   = "/linkshortener.api.v1.LinkShortenerService/DeleteMyItem"
+	LinkShortenerService_Redirect_FullMethodName       = "/linkshortener.api.v1.LinkShortenerService/Redirect"
 )
 
 // LinkShortenerServiceClient is the client API for LinkShortenerService service.
@@ -35,7 +35,8 @@ type LinkShortenerServiceClient interface {
 	GetLink(ctx context.Context, in *GetLinkRequest, opts ...grpc.CallOption) (*Link, error)
 	UpdateLink(ctx context.Context, in *PutLinkRequest, opts ...grpc.CallOption) (*PutLinkResponse, error)
 	ExtendLifeTime(ctx context.Context, in *PatchLinkRequest, opts ...grpc.CallOption) (*PatchLinkResponse, error)
-	DeleteMyItem(ctx context.Context, in *DeleteLinkRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DeleteMyItem(ctx context.Context, in *DeleteLinkRequest, opts ...grpc.CallOption) (*DeleteLinkResponse, error)
+	Redirect(ctx context.Context, in *RedirectRequest, opts ...grpc.CallOption) (*RedirectResponse, error)
 }
 
 type linkShortenerServiceClient struct {
@@ -86,10 +87,20 @@ func (c *linkShortenerServiceClient) ExtendLifeTime(ctx context.Context, in *Pat
 	return out, nil
 }
 
-func (c *linkShortenerServiceClient) DeleteMyItem(ctx context.Context, in *DeleteLinkRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *linkShortenerServiceClient) DeleteMyItem(ctx context.Context, in *DeleteLinkRequest, opts ...grpc.CallOption) (*DeleteLinkResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
+	out := new(DeleteLinkResponse)
 	err := c.cc.Invoke(ctx, LinkShortenerService_DeleteMyItem_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *linkShortenerServiceClient) Redirect(ctx context.Context, in *RedirectRequest, opts ...grpc.CallOption) (*RedirectResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RedirectResponse)
+	err := c.cc.Invoke(ctx, LinkShortenerService_Redirect_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +115,8 @@ type LinkShortenerServiceServer interface {
 	GetLink(context.Context, *GetLinkRequest) (*Link, error)
 	UpdateLink(context.Context, *PutLinkRequest) (*PutLinkResponse, error)
 	ExtendLifeTime(context.Context, *PatchLinkRequest) (*PatchLinkResponse, error)
-	DeleteMyItem(context.Context, *DeleteLinkRequest) (*emptypb.Empty, error)
+	DeleteMyItem(context.Context, *DeleteLinkRequest) (*DeleteLinkResponse, error)
+	Redirect(context.Context, *RedirectRequest) (*RedirectResponse, error)
 	mustEmbedUnimplementedLinkShortenerServiceServer()
 }
 
@@ -127,8 +139,11 @@ func (UnimplementedLinkShortenerServiceServer) UpdateLink(context.Context, *PutL
 func (UnimplementedLinkShortenerServiceServer) ExtendLifeTime(context.Context, *PatchLinkRequest) (*PatchLinkResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ExtendLifeTime not implemented")
 }
-func (UnimplementedLinkShortenerServiceServer) DeleteMyItem(context.Context, *DeleteLinkRequest) (*emptypb.Empty, error) {
+func (UnimplementedLinkShortenerServiceServer) DeleteMyItem(context.Context, *DeleteLinkRequest) (*DeleteLinkResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteMyItem not implemented")
+}
+func (UnimplementedLinkShortenerServiceServer) Redirect(context.Context, *RedirectRequest) (*RedirectResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Redirect not implemented")
 }
 func (UnimplementedLinkShortenerServiceServer) mustEmbedUnimplementedLinkShortenerServiceServer() {}
 func (UnimplementedLinkShortenerServiceServer) testEmbeddedByValue()                              {}
@@ -241,6 +256,24 @@ func _LinkShortenerService_DeleteMyItem_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LinkShortenerService_Redirect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RedirectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LinkShortenerServiceServer).Redirect(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LinkShortenerService_Redirect_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LinkShortenerServiceServer).Redirect(ctx, req.(*RedirectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LinkShortenerService_ServiceDesc is the grpc.ServiceDesc for LinkShortenerService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -267,6 +300,10 @@ var LinkShortenerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteMyItem",
 			Handler:    _LinkShortenerService_DeleteMyItem_Handler,
+		},
+		{
+			MethodName: "Redirect",
+			Handler:    _LinkShortenerService_Redirect_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

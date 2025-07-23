@@ -11,6 +11,7 @@ import (
 type LinkCacheManager interface {
 	Set(context.Context, domain.Link) error
 	GetByID(context.Context, uuid.UUID) (domain.Link, error)
+	GetByShortURI(context.Context, int64) (domain.Link, error)
 	DeleteByID(context.Context, uuid.UUID) error
 	Clear(context.Context) error
 }
@@ -18,6 +19,7 @@ type LinkCacheManager interface {
 type LinkStorageManager interface {
 	Create(context.Context, domain.Link) (domain.Link, error)
 	GetByID(context.Context, uuid.UUID) (domain.Link, error)
+	GetByShortURI(context.Context, int64) (domain.Link, error)
 	UpdateByID(context.Context, domain.Link) (domain.Link, error)
 	UpdateExpiresAt(context.Context, uuid.UUID, time.Time) error
 	MarkIsDeletedByID(context.Context, uuid.UUID) error

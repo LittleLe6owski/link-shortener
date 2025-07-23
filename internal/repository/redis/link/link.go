@@ -3,7 +3,9 @@ package redislink
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -28,13 +30,64 @@ func (l Link) Set(ctx context.Context, link domain.Link) error {
 		return err
 	}
 
-	return l.client.Set(ctx, l.formKey(link.ID), b, l.ttl).Err()
+	return l.client.Set(ctx, l.formKeyForSave(link.ID, link.ShortURI), b, l.ttl).Err()
 }
 
 func (l Link) GetByID(ctx context.Context, id uuid.UUID) (domain.Link, error) {
-	val, err := l.client.Get(ctx, l.formKey(id)).Bytes()
+	key, err := l.formKeyForGet(id, 0)
 	if err != nil {
 		return domain.Link{}, err
+	}
+
+	iter := l.client.Scan(ctx, 0, key, 1).Iterator()
+	if !iter.Next(ctx) {
+		return domain.Link{}, nil
+	}
+
+	val, err := l.client.Get(ctx, iter.Val()).Bytes()
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return domain.Link{}, nil
+		}
+
+		return domain.Link{}, err
+	}
+
+	if err := l.client.Expire(ctx, iter.Val(), l.ttl).Err(); err != nil {
+		return domain.Link{}, fmt.Errorf("failed to update TTL: %v", err)
+	}
+
+	link := domain.Link{}
+	err = json.Unmarshal(val, &link)
+	if err != nil {
+		return domain.Link{}, err
+	}
+
+	return link, nil
+}
+
+func (l Link) GetByShortURI(ctx context.Context, shortURI int64) (domain.Link, error) {
+	key, err := l.formKeyForGet(uuid.Nil, shortURI)
+	if err != nil {
+		return domain.Link{}, err
+	}
+
+	iter := l.client.Scan(ctx, 0, key, 1).Iterator()
+	if !iter.Next(ctx) {
+		return domain.Link{}, nil
+	}
+
+	val, err := l.client.Get(ctx, iter.Val()).Bytes()
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return domain.Link{}, nil
+		}
+
+		return domain.Link{}, err
+	}
+
+	if err := l.client.Expire(ctx, iter.Val(), l.ttl).Err(); err != nil {
+		return domain.Link{}, fmt.Errorf("failed to update TTL: %v", err)
 	}
 
 	link := domain.Link{}
@@ -47,7 +100,17 @@ func (l Link) GetByID(ctx context.Context, id uuid.UUID) (domain.Link, error) {
 }
 
 func (l Link) DeleteByID(ctx context.Context, id uuid.UUID) error {
-	return l.client.Del(ctx, l.formKey(id)).Err()
+	key, err := l.formKeyForGet(id, 0)
+	if err != nil {
+		return err
+	}
+
+	iter := l.client.Scan(ctx, 0, key, 1).Iterator()
+	if !iter.Next(ctx) {
+		return redis.Nil
+	}
+
+	return l.client.Del(ctx, iter.Val()).Err()
 }
 
 func (r Link) Clear(ctx context.Context) error {
@@ -75,6 +138,21 @@ func (r Link) Clear(ctx context.Context) error {
 	}
 }
 
-func (l Link) formKey(id uuid.UUID) string {
-	return strings.Join([]string{l.globalPrefix, id.String()}, "_")
+func (l Link) formKeyForSave(id uuid.UUID, shortURI int64) string {
+	return strings.Join(
+		[]string{l.globalPrefix, id.String(), strconv.Itoa(int(shortURI))}, "_",
+	)
+}
+
+func (l Link) formKeyForGet(id uuid.UUID, shortURI int64) (string, error) {
+	switch {
+	case id == uuid.Nil:
+		return strings.
+			Join([]string{l.globalPrefix, "*", strconv.Itoa(int(shortURI))}, "_"), nil
+	case shortURI == 0:
+		return strings.
+			Join([]string{l.globalPrefix, id.String(), "*"}, "_"), nil
+	default:
+		return "", errors.New("id and short uri is empty")
+	}
 }

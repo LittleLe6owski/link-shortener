@@ -52,10 +52,10 @@ type PostgresClientConfig struct {
 }
 
 type RedisConfig struct {
-	Host         string        `env:"REDIS_ADDRESS" validate:"required" envDefault:"localhost:6379"`
-	Password     string        `env:"REDIS_PASSWORD" validate:"required" envDefault:"password"`
-	Database     int           `env:"REDIS_DB" validate:"omitempty" envDefault:"0"  description:"индекс используемой БД в Redis"`
-	Prefix       string        `env:"PREFIX" validate:"required" envDefault:"link_shortener"`
+	Hosts        string        `env:"HOSTS" validate:"required"`
+	Password     string        `env:"PASSWORD" validate:"required"`
+	Database     int           `env:"DB" validate:"omitempty" envDefault:"0"`
+	PrefixKey    string        `env:"PREFIX" validate:"required" envDefault:"link_shortener"`
 	DefaultTTL   time.Duration `env:"DEFAULT_TTL" validate:"required" envDefault:"6m"`
 	ReadTimeout  time.Duration `env:"READ_TIMEOUT" validate:"required" envDefault:"1m"`
 	WriteTimeout time.Duration `env:"WRITE_TIMEOUT" validate:"required" envDefault:"1m"`
